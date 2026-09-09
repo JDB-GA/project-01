@@ -1,12 +1,11 @@
-package Operation;
+package transaction;
 
-import auth.Auth;
 import general.Constants;
 import general.Functions;
 
 import java.util.List;
 
-public abstract class Operation {
+public abstract class TransactionService {
 
     public abstract String withdraw();
 
@@ -14,12 +13,12 @@ public abstract class Operation {
 
     public abstract String transfer(String accountOneId, String accountTwoId);
 
-    public String transaction(String accountId, String transactionType, double amount, String description, String relatedAccountId) {
+    public String transaction(String fromId, String transactionType, double amount, String description, String toId) {
         String now = Functions.getNow();
         String amountString = String.valueOf(amount);
-        List<String> row = List.of(accountId, transactionType, amountString, description, relatedAccountId, now);
+        List<String> row = List.of(fromId, transactionType, amountString, description, toId, now);
         Functions.addRow(Constants.TRANSACTION_TABLE, row);
-        return transactionType + " transaction executed successfully";
+        return String.join(Constants.EMPTY_STRING, transactionType, Constants.TRANSACTION_EXECUTED_SUCCESSFULLY);
     }
 }
 

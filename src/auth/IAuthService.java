@@ -2,7 +2,7 @@ package auth;
 
 import java.util.List;
 
-public interface IAuth {
+public interface IAuthService {
     String login(String username, String password);
 
     String register(String username, String password, String role);
@@ -21,9 +21,9 @@ public interface IAuth {
 
     boolean authState(String userId);
 
-    void createSession(String userId);
+    void createAuthTracker(String userId);
 
-    int countFailedAttempts(String userId);
+    void countFailedAttempts(String userId);
 
     String[] getAuthTrackerByUserId(String userId);
 

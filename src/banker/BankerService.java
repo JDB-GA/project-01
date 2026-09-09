@@ -1,23 +1,25 @@
 package banker;
 
-import Operation.Operation;
-import auth.Auth;
+import transaction.TransactionService;
+import auth.AuthService;
 import general.AppLogger;
 import general.Constants;
-import general.FileControl;
 import general.Functions;
+import repositories.AccountRepository;
 
 import java.util.List;
 
-public class Banker extends Operation implements IBanker {
+public class BankerService extends TransactionService implements IBankerService {
+
+    private final AccountRepository accountRepository = new AccountRepository();
 
     @Override
     public String addCustomer(String username, String password, String initialAccountType) {
-        Auth auth = new Auth();
+        AuthService auth = new AuthService();
         String userId = auth.register(username, password, Constants.UserRole.CUSTOMER.name());
-        if (userId.equals("The account already exists!")) {
+        if (userId.equals(Constants.ACCOUNT_ALREADY_EXISTS)) {
 
-            return "The Customer already exists! Use create account instead!";
+            return Constants.CUSTOMER_ALREADY_EXISTS;
         }
 
         return createAccount(userId, initialAccountType);
@@ -28,47 +30,46 @@ public class Banker extends Operation implements IBanker {
         try {
             if (checkAccountExists(customerId, accountType)) {
 
-                return accountType + " account already exists for this customer";
+                return String.join(Constants.EMPTY_STRING, accountType, Constants.ACCOUNT_ALREADY_EXISTS_FOR_CUSTOMER);
             }
             String id = Functions.generateUUID();
             String now = Functions.getNow();
             String status = Constants.AccountStatus.ACTIVE.name();
             double balance = Constants.ACCOUNT_BALANCE_DEFAULT;
             int overdraftCount = Constants.OVERDRAFT_COUNT_DEFAULT;
-            String row = id + "," + customerId + "," + accountType + "," + balance + "," + status + "," + overdraftCount + "," + now;
-            FileControl.append(Constants.ACCOUNT_TABLE, List.of(row));
+            accountRepository.save(id, customerId, accountType, balance, status, overdraftCount, now);
         } catch (Exception e) {
             AppLogger.error("Create Account Error", e);
         }
 
-        return accountType + " account created for this customer of Id: " + customerId;
+        return String.join(Constants.EMPTY_STRING, accountType, Constants.ACCOUNT_CREATED_FOR_CUSTOMER, customerId);
     }
 
     @Override
     public boolean checkAccountExists(String userId, String accountType) {
 
-        return getAccounts().stream().anyMatch(account -> account[1].equals(userId) && account[2].equals(accountType));
+        return accountRepository.existsForCustomer(userId, accountType);
     }
 
     @Override
     public List<String[]> getAccounts() {
 
-        return Functions.getTable(Constants.ACCOUNT_TABLE);
+        return accountRepository.findAll();
     }
 
     @Override
     public String withdraw() {
-        return "";
+        return Constants.EMPTY_STRING;
     }
 
     @Override
     public String deposit() {
-        return "";
+        return Constants.EMPTY_STRING;
     }
 
     @Override
     public String transfer(String accountOneId, String accountTwoId) {
-        return "";
+        return Constants.EMPTY_STRING;
     }
 
 }
