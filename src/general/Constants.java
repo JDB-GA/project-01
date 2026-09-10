@@ -29,10 +29,15 @@ public class Constants {
     public static final int OVERDRAFT_COUNT_DEFAULT = 0;
     public static final double ACCOUNT_BALANCE_DEFAULT = 0.0;
     public static final String EMPTY_STRING = "";
+    public static final String SPACE = " ";
     public static final String CSV_SEPARATOR = ",";
     public static final String TRUE = "true";
     public static final String FALSE = "false";
     public static final String ZERO = "0";
+
+    public static final String TABLE_WRITE_ERROR = "An error occurred while updating table field";
+    public static final String TABLE_READ_ERROR = "An error occurred while adding new columns";
+    public static final String TABLE_APPEND_ERROR = "An error occurred while reading table";
 
     public static final String INCORRECT_CREDENTIALS = "Incorrect Credentials";
     public static final String TOO_MANY_FAILED_ATTEMPTS = "Too many failed attempts. Try again later";

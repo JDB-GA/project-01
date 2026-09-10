@@ -11,7 +11,7 @@ public class FileControl {
     }
 
     public static void append(Path path, List<String> lines) throws IOException {
-        Files.write(path, lines, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+        Files.write(path, lines, StandardOpenOption.APPEND);
     }
 
     public static List<String> read(Path path) throws IOException {

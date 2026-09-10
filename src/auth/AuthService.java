@@ -13,8 +13,13 @@ import java.util.List;
 
 public class AuthService implements IAuthService {
 
-    private final UserRepository userRepository = new UserRepository();
-    private final AuthTrackerRepository authTrackerRepository = new AuthTrackerRepository();
+    private final UserRepository userRepository;
+    private final AuthTrackerRepository authTrackerRepository;
+
+    public AuthService(UserRepository userRepository, AuthTrackerRepository authTrackerRepository) {
+        this.userRepository = userRepository;
+        this.authTrackerRepository = authTrackerRepository;
+    }
 
     @Override
     public String login(String username, String password) {

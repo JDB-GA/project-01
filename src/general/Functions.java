@@ -24,7 +24,7 @@ public class Functions {
                     .toList();
 
         } catch (Exception e) {
-            AppLogger.error("An error occurred while reading users", e);
+            AppLogger.error(Constants.TABLE_READ_ERROR, e);
 
             return null;
         }
@@ -34,7 +34,7 @@ public class Functions {
         try {
             FileControl.append(tablePath, row);
         } catch (Exception e) {
-            AppLogger.error("An error occurred while adding new columns", e);
+            AppLogger.error(Constants.TABLE_APPEND_ERROR, e);
         }
     }
 
@@ -70,7 +70,7 @@ public class Functions {
             FileControl.write(tablePath, updatedRows);
             return true;
         } catch (Exception e) {
-            AppLogger.error("An error occurred while updating table field", e);
+            AppLogger.error(Constants.TABLE_WRITE_ERROR, e);
 
             return false;
         }

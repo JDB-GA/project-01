@@ -1,10 +1,13 @@
 import auth.AuthService;
 import banker.BankerService;
+import repositories.AccountRepository;
+import repositories.AuthTrackerRepository;
+import repositories.UserRepository;
 
 public class Main {
     public static void main(String[] args) {
-        AuthService auth = new AuthService();
-        BankerService banker = new BankerService();
+        AuthService auth = new AuthService(new UserRepository(), new AuthTrackerRepository());
+        BankerService banker = new BankerService(new AccountRepository(), auth);
 //        System.out.println(auth.hashPassword("something"));
 //        System.out.println(Functions.generateUUID());
 //        System.out.println(auth.login("muntadher", "something"));

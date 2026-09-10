@@ -11,11 +11,17 @@ import java.util.List;
 
 public class BankerService extends TransactionService implements IBankerService {
 
-    private final AccountRepository accountRepository = new AccountRepository();
+    private final AccountRepository accountRepository;
+    private final AuthService auth;
+
+    public BankerService(AccountRepository accountRepository, AuthService auth) {
+        this.accountRepository = accountRepository;
+        this.auth = auth;
+    }
 
     @Override
     public String addCustomer(String username, String password, String initialAccountType) {
-        AuthService auth = new AuthService();
+
         String userId = auth.register(username, password, Constants.UserRole.CUSTOMER.name());
         if (userId.equals(Constants.ACCOUNT_ALREADY_EXISTS)) {
 
@@ -58,18 +64,17 @@ public class BankerService extends TransactionService implements IBankerService 
     }
 
     @Override
-    public String withdraw() {
-        return Constants.EMPTY_STRING;
+    public String deposit(String userId, String accountId, double amount) {
+        return "";
     }
 
     @Override
-    public String deposit() {
-        return Constants.EMPTY_STRING;
+    public String withdraw(String userId, String accountId, double amount) {
+        return "";
     }
 
     @Override
-    public String transfer(String accountOneId, String accountTwoId) {
-        return Constants.EMPTY_STRING;
+    public String transfer(String userId, String fromAccountId, String toAccountId, double amount) {
+        return "";
     }
-
 }

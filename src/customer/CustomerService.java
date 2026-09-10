@@ -6,17 +6,17 @@ import general.Constants;
 public class CustomerService extends TransactionService {
 
     @Override
-    public String withdraw() {
-        return Constants.EMPTY_STRING;
+    public String deposit(String userId, String accountId, double amount) {
+        return "";
     }
 
     @Override
-    public String deposit() {
-        return Constants.EMPTY_STRING;
+    public String withdraw(String userId, String accountId, double amount) {
+        return "";
     }
 
     @Override
-    public String transfer(String accountOneId, String accountTwoId) {
-        return Constants.EMPTY_STRING;
+    public String transfer(String userId, String fromAccountId, String toAccountId, double amount) {
+        return "";
     }
 }
