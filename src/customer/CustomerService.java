@@ -1,22 +1,13 @@
 package customer;
 
+import auth.AuthService;
+import repositories.AccountRepository;
+import repositories.TransactionRepository;
 import transaction.TransactionService;
-import general.Constants;
 
 public class CustomerService extends TransactionService {
 
-    @Override
-    public String deposit(String userId, String accountId, double amount) {
-        return "";
-    }
-
-    @Override
-    public String withdraw(String userId, String accountId, double amount) {
-        return "";
-    }
-
-    @Override
-    public String transfer(String userId, String fromAccountId, String toAccountId, double amount) {
-        return "";
+    public CustomerService(AccountRepository accountRepository, TransactionRepository transactionRepository, AuthService authService) {
+        super(accountRepository, transactionRepository, authService);
     }
 }

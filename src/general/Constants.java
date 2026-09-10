@@ -27,6 +27,7 @@ public class Constants {
     }
 
     public static final int OVERDRAFT_COUNT_DEFAULT = 0;
+    public static final int OVERDRAFT_PENALTY_DEFAULT = 35;
     public static final double ACCOUNT_BALANCE_DEFAULT = 0.0;
     public static final String EMPTY_STRING = "";
     public static final String SPACE = " ";
@@ -35,9 +36,11 @@ public class Constants {
     public static final String FALSE = "false";
     public static final String ZERO = "0";
 
+    public static final String BALANCE_UPDATE_SUCCESS = "The balance updated successfully!";
     public static final String TABLE_WRITE_ERROR = "An error occurred while updating table field";
     public static final String TABLE_READ_ERROR = "An error occurred while adding new columns";
     public static final String TABLE_APPEND_ERROR = "An error occurred while reading table";
+    public static final String GENERAL_ERROR = "Error";
 
     public static final String INCORRECT_CREDENTIALS = "Incorrect Credentials";
     public static final String TOO_MANY_FAILED_ATTEMPTS = "Too many failed attempts. Try again later";
@@ -57,6 +60,6 @@ public class Constants {
 
     public static final String USER_TABLE_HEADER = String.join(CSV_SEPARATOR, "ID", "USERNAME", "HASHED_PASSWORD", "ROLE", "CREATED_AT");
     public static final String ACCOUNT_TABLE_HEADER = String.join(CSV_SEPARATOR, "ID", "CUSTOMER_ID", "ACCOUNT_TYPE", "BALANCE", "STATUS", "OVERDRAFT_COUNT", "CREATED_AT");
-    public static final String TRANSACTION_TABLE_HEADER = String.join(CSV_SEPARATOR, "ID", "FROM_ACCOUNT_ID", "TRANSACTION_TYPE", "AMOUNT", "DESCRIPTION", "TO_ACCOUNT_ID", "CREATED_AT");
+    public static final String TRANSACTION_TABLE_HEADER = String.join(CSV_SEPARATOR, "ID", "ACCOUNT_ID", "TRANSACTION_TYPE", "AMOUNT", "DESCRIPTION", "RELATED_ACCOUNT_ID", "CREATED_AT");
     public static final String AUTH_TRACKER_TABLE_HEADER = String.join(CSV_SEPARATOR, "ID", "USER_ID", "IS_LOGGED_IN", "FAILED_ATTEMPTS", "LOCKED_UNTIL", "UPDATED_AT");
 }

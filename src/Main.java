@@ -1,26 +1,54 @@
 import auth.AuthService;
-import banker.BankerService;
-import repositories.AccountRepository;
+import general.Constants;
 import repositories.AuthTrackerRepository;
 import repositories.UserRepository;
 
+import java.util.Optional;
+import java.util.Scanner;
+
 public class Main {
+
     public static void main(String[] args) {
-        AuthService auth = new AuthService(new UserRepository(), new AuthTrackerRepository());
-        BankerService banker = new BankerService(new AccountRepository(), auth);
-//        System.out.println(auth.hashPassword("something"));
-//        System.out.println(Functions.generateUUID());
-//        System.out.println(auth.login("muntadher", "something"));
-//        System.out.println(auth.login("muntadher", "somethings"));
-        System.out.println(auth.login("almutawaj", "somethingsk"));
-        String userId = "bd0c11a6-7083-47c5-8070-d978b4f07161";
-//        System.out.println(auth.logout(userId));
-//        System.out.println(Arrays.toString(auth.getUserById(userId)));
-//        System.out.println(auth.checkRole(userId));
-//        System.out.println(auth.register("muntadher", "something", "BANKER"));
-        //        System.out.println(banker.addCustomer("muntadhers", "something", Constants.AccountType.CHECKING.name()));
-//        System.out.println(banker.createAccount(userId, Constants.AccountType.SAVINGS.name()));
-//        System.out.println(auth.resetPassword(userId, "somethings"));
+        AuthService authService = new AuthService(
+                new UserRepository(),
+                new AuthTrackerRepository()
+        );
+
+        try (Scanner scanner = new Scanner(System.in)) {
+            authService.resetPassword("54a3b54a-1874-4cc9-ba2d-e4d2858c303c", "something");
+            Optional<String[]> actor = authenticateActor(authService, scanner);
+
+            if (actor.isEmpty()) {
+                return;
+            }
+
+            String[] actorRecord = actor.get();
+            System.out.println("Welcome " + actorRecord[1] + " (" + actorRecord[3] + ")");
+
+            authService.logout(actorRecord[0]);
+        }
     }
 
+    private static Optional<String[]> authenticateActor(
+            AuthService authService,
+            Scanner scanner
+    ) {
+        System.out.print("Username: ");
+        String username = scanner.nextLine().trim();
+
+        System.out.print("Password: ");
+        String password = scanner.nextLine();
+
+        String loginResult = authService.login(username, password);
+        System.out.println(loginResult);
+
+        if (!Constants.LOGIN_SUCCESSFUL.equals(loginResult)) {
+            return Optional.empty();
+        }
+
+        String[] actor = authService.getUserByUsername(username);
+        return actor.length == 0
+                ? Optional.empty()
+                : Optional.of(actor);
+    }
 }

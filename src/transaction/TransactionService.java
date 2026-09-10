@@ -1,25 +1,147 @@
 package transaction;
 
-public abstract class TransactionService {
+import auth.AuthService;
+import general.Constants;
+import repositories.AccountRepository;
+import repositories.TransactionRepository;
 
-    public abstract String deposit(String userId, String accountId, double amount);
+import java.util.List;
 
-    public abstract String withdraw(String userId, String accountId, double amount);
+public class TransactionService {
 
-    public abstract String transfer(
-            String userId,
+    protected final AccountRepository accountRepository;
+    protected final TransactionRepository transactionRepository;
+    private final AuthService authService;
+
+    public TransactionService(AccountRepository accountRepository, TransactionRepository transactionRepository, AuthService authService) {
+        this.accountRepository = accountRepository;
+        this.transactionRepository = transactionRepository;
+        this.authService = authService;
+    }
+
+    public boolean deposit(String userId, String accountId, double amount) {
+        return deposit(userId, userId, accountId, amount);
+    }
+
+    public boolean deposit(String actorUserId, String accountOwnerId, String accountId, double amount) {
+        if (isNotAuthorized(actorUserId, accountOwnerId)) return false;
+        if (invalidAmount(amount)) return false;
+
+        String[] account = accountRepository.getUserAccount(accountId);
+        double currentBalance = Double.parseDouble(account[3]);
+        double newBalance = currentBalance + amount;
+
+        commonDepositCheck(newBalance, account);
+
+        accountRepository.updateBalance(accountId, String.valueOf(newBalance));
+        transactionRepository.save(accountId, Constants.TransactionType.DEPOSIT.name(), amount, Constants.EMPTY_STRING);
+
+        return true;
+    }
+
+    public boolean withdraw(String userId, String accountId, double amount) {
+
+        return withdraw(userId, userId, accountId, amount);
+    }
+
+    public boolean withdraw(String actorUserId, String accountOwnerId, String accountId, double amount) {
+        if (invalidAmount(amount)) return false;
+        if (isNotAuthorized(actorUserId, accountOwnerId)) return false;
+
+        String[] userAccount = accountRepository.getUserAccount(accountId);
+        double currentBalance = Double.parseDouble(userAccount[3]);
+        int overdraftCount = Integer.parseInt(userAccount[5]);
+        if ((currentBalance < 0 && amount > 100)
+                || (overdraftCount >= 2)
+                || (userAccount[4].equals(Constants.AccountStatus.DISABLED.name()))
+        ) {
+            return false;
+        } else if (currentBalance < amount) {
+            transactionRepository.save(accountId, Constants.TransactionType.OVERDRAFT_FEE.name(), Constants.OVERDRAFT_PENALTY_DEFAULT, Constants.EMPTY_STRING);
+            currentBalance -= Constants.OVERDRAFT_PENALTY_DEFAULT;
+            overdraftCount++;
+            accountRepository.updateOverdraftCount(accountId, overdraftCount);
+            if (overdraftCount >= 2) {
+                accountRepository.updateStatus(accountId, Constants.AccountStatus.DISABLED.name());
+            }
+        }
+
+        double newBalance = currentBalance - amount;
+
+        accountRepository.updateBalance(accountId, String.valueOf(newBalance));
+        transactionRepository.save(accountId, Constants.TransactionType.WITHDRAW.name(), amount, Constants.EMPTY_STRING);
+
+        return true;
+    }
+
+    public String transfer(String userIdFrom, String fromAccountId, String toAccountId, double amount) {
+        return transfer(userIdFrom, userIdFrom, fromAccountId, toAccountId, amount);
+    }
+
+    public String transfer(
+            String actorUserId,
+            String fromAccountOwnerId,
             String fromAccountId,
             String toAccountId,
             double amount
-    );
+    ) {
+        if (isNotAuthorized(actorUserId, fromAccountOwnerId)) return Constants.GENERAL_ERROR;
+
+        if (withdraw(actorUserId, fromAccountOwnerId, fromAccountId, amount)
+                && depositToAccount(toAccountId, amount)) {
+            return Constants.BALANCE_UPDATE_SUCCESS;
+        }
+
+        return Constants.GENERAL_ERROR;
+    }
+
+    private boolean isNotAuthorized(String actorUserId, String accountOwnerId) {
+        if (!authService.authState(actorUserId)) {
+            return true;
+        }
+
+        boolean isAccountOwner = actorUserId.equals(accountOwnerId);
+        boolean isBanker = authService.checkRole(
+                actorUserId,
+                Constants.UserRole.BANKER.name()
+        );
+
+        return !isAccountOwner && !isBanker;
+    }
+
+    private boolean depositToAccount(String accountId, double amount) {
+        if (invalidAmount(amount)) return false;
+        String[] account = accountRepository.getUserAccount(accountId);
+        if (account.length == 0) return false;
+
+        double newBalance = Double.parseDouble(account[3]) + amount;
+
+        commonDepositCheck(newBalance, account);
+
+        accountRepository.updateBalance(accountId, String.valueOf(newBalance));
+        transactionRepository.save(accountId, Constants.TransactionType.DEPOSIT.name(), amount);
+
+        return true;
+    }
+
+    private void commonDepositCheck(double newBalance, String[] account) {
+        if (newBalance >= 0 && account[4].equals(Constants.AccountStatus.DISABLED.name())) {
+            accountRepository.updateStatus(account[0], Constants.AccountStatus.ACTIVE.name());
+            accountRepository.updateOverdraftCount(
+                    account[0],
+                    Constants.OVERDRAFT_COUNT_DEFAULT
+            );
+        }
+    }
+
+    private boolean invalidAmount(double amount) {
+        return !(amount > 0);
+    }
+
+    public List<String[]> displayAllTransactions(String accountId) {
+        return transactionRepository.getTransactionTable()
+                .stream()
+                .filter(transaction -> transaction[1].equals(accountId)).toList();
+    }
+
 }
-
-
-// Account Transactions
-//
-//Withdraw Money (requires login)
-//From savings or checking accounts.
-//Deposit Money (requires login)
-//Into savings or checking accounts.
-//Transfer Money (requires login)
-//Between a customer's own accounts or to another customer's account.

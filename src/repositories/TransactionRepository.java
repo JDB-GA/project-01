@@ -6,11 +6,27 @@ import general.Functions;
 import java.util.List;
 
 public class TransactionRepository {
-    public String save(String fromAccountId, String transactionType, double amount, String description, String toAccountId) {
-        String now = Functions.getNow();
-        String amountString = String.valueOf(amount);
-        List<String> row = List.of(fromAccountId, transactionType, amountString, description, toAccountId, now);
-        Functions.addRow(Constants.TRANSACTION_TABLE, row);
-        return String.join(Constants.SPACE, transactionType, Constants.TRANSACTION_EXECUTED_SUCCESSFULLY);
+
+    public void save(String accountId, String transactionType, double amount, String relatedAccountId) {
+        String row = String.join(
+                Constants.CSV_SEPARATOR,
+                Functions.generateUUID(),
+                accountId,
+                transactionType,
+                String.valueOf(amount),
+                Constants.EMPTY_STRING,
+                relatedAccountId,
+                Functions.getNow()
+        );
+
+        Functions.addRow(Constants.TRANSACTION_TABLE, List.of(row));
+    }
+
+    public void save(String accountId, String transactionType, double amount) {
+        save(accountId, transactionType, amount, Constants.EMPTY_STRING);
+    }
+
+    public List<String[]> getTransactionTable() {
+        return Functions.getTable(Constants.TRANSACTION_TABLE);
     }
 }

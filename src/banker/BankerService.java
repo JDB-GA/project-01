@@ -1,5 +1,6 @@
 package banker;
 
+import repositories.TransactionRepository;
 import transaction.TransactionService;
 import auth.AuthService;
 import general.AppLogger;
@@ -12,17 +13,18 @@ import java.util.List;
 public class BankerService extends TransactionService implements IBankerService {
 
     private final AccountRepository accountRepository;
-    private final AuthService auth;
+    private final AuthService authService;
 
-    public BankerService(AccountRepository accountRepository, AuthService auth) {
+    public BankerService(AccountRepository accountRepository, AuthService authService, TransactionRepository transactionRepository) {
+        super(accountRepository, transactionRepository, authService);
         this.accountRepository = accountRepository;
-        this.auth = auth;
+        this.authService = authService;
     }
 
     @Override
     public String addCustomer(String username, String password, String initialAccountType) {
 
-        String userId = auth.register(username, password, Constants.UserRole.CUSTOMER.name());
+        String userId = authService.register(username, password, Constants.UserRole.CUSTOMER.name());
         if (userId.equals(Constants.ACCOUNT_ALREADY_EXISTS)) {
 
             return Constants.CUSTOMER_ALREADY_EXISTS;
@@ -45,7 +47,7 @@ public class BankerService extends TransactionService implements IBankerService 
             int overdraftCount = Constants.OVERDRAFT_COUNT_DEFAULT;
             accountRepository.save(id, customerId, accountType, balance, status, overdraftCount, now);
         } catch (Exception e) {
-            AppLogger.error("Create Account Error", e);
+            AppLogger.error(Constants.GENERAL_ERROR, e);
         }
 
         return String.join(Constants.EMPTY_STRING, accountType, Constants.ACCOUNT_CREATED_FOR_CUSTOMER, customerId);
@@ -63,18 +65,5 @@ public class BankerService extends TransactionService implements IBankerService 
         return accountRepository.findAll();
     }
 
-    @Override
-    public String deposit(String userId, String accountId, double amount) {
-        return "";
-    }
 
-    @Override
-    public String withdraw(String userId, String accountId, double amount) {
-        return "";
-    }
-
-    @Override
-    public String transfer(String userId, String fromAccountId, String toAccountId, double amount) {
-        return "";
-    }
 }

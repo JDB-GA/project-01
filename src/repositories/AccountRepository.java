@@ -38,4 +38,46 @@ public class AccountRepository {
         );
         Functions.addRow(Constants.ACCOUNT_TABLE, List.of(row));
     }
+
+    public String[] getUserAccount(String accountId) {
+        return findAll()
+                .stream()
+                .filter(row -> row[0].equals(accountId))
+                .findFirst()
+                .orElseGet(() -> new String[0]);
+    }
+
+    public void updateBalance(String accountId, String newBalance) {
+        Functions.updateTableField(
+                Constants.ACCOUNT_TABLE,
+                Constants.ACCOUNT_TABLE_HEADER,
+                0,
+                accountId,
+                3,
+                newBalance
+        );
+
+    }
+
+    public void updateOverdraftCount(String accountId, int overdraftCount) {
+        Functions.updateTableField(
+                Constants.ACCOUNT_TABLE,
+                Constants.ACCOUNT_TABLE_HEADER,
+                0,
+                accountId,
+                5,
+                String.valueOf(overdraftCount)
+        );
+    }
+
+    public void updateStatus(String accountId, String status) {
+        Functions.updateTableField(
+                Constants.ACCOUNT_TABLE,
+                Constants.ACCOUNT_TABLE_HEADER,
+                0,
+                accountId,
+                4,
+                status
+        );
+    }
 }
