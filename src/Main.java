@@ -2,6 +2,7 @@ import app.App;
 import app.Dependencies;
 import auth.AuthService;
 import banker.BankerService;
+import customer.CustomerService;
 import repositories.AccountRepository;
 import repositories.AuthTrackerRepository;
 import repositories.TransactionRepository;
@@ -24,8 +25,15 @@ public class Main {
         TransactionRepository transactionRepository = new TransactionRepository();
         AccountRepository accountRepository = new AccountRepository();
         BankerService bankerService = new BankerService(accountRepository, authService, transactionRepository);
+        CustomerService customerService = new CustomerService(accountRepository, transactionRepository, authService);
 
-        return new Dependencies(authService, userRepository, authTrackerRepository, bankerService, accountRepository);
+        return new Dependencies(authService,
+                userRepository,
+                authTrackerRepository,
+                bankerService,
+                accountRepository,
+                customerService
+        );
     }
 
 }

@@ -30,6 +30,7 @@ public class Constants {
     public static final String ZERO = "0";
 
     public static final String BALANCE_UPDATE_SUCCESS = "The balance updated successfully!";
+    public static final String PASSWORD_UPDATE_SUCCESS = "The password reset successfully!";
     public static final String TABLE_WRITE_ERROR = "An error occurred while updating table field";
     public static final String TABLE_READ_ERROR = "An error occurred while adding new columns";
     public static final String TABLE_APPEND_ERROR = "An error occurred while reading table";

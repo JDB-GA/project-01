@@ -117,7 +117,7 @@ public class AuthService implements IAuthService {
     public boolean resetPassword(String userId, String newPassword) {
         String hashedPassword = hashPassword(newPassword);
 
-        return userRepository.updatePassword(userId, hashedPassword);
+        return userRepository.updatePassword(userId, hashedPassword) && logout(userId);
     }
 
     @Override

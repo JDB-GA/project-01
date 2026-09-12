@@ -3,6 +3,7 @@ package common;
 import auth.AuthService;
 import general.Constants;
 import repositories.AccountRepository;
+import transaction.ITransactionService;
 
 import java.util.List;
 import java.util.Map;
@@ -98,6 +99,28 @@ public class CommonService implements ICommonService {
                         transaction[7]
                 ));
         System.out.println("---------------------------------------------------");
+    }
+
+    public void logout(String[] actor) {
+        boolean result = authService.logout(actor[0]);
+        if (result) {
+            System.out.println(Constants.LOGOUT_SUCCESSFUL);
+        }
+    }
+
+    public void displayTransactions(
+            Scanner scanner,
+            String[] actor,
+            ITransactionService transactionService,
+            boolean isCustomer
+    ) {
+        String customerId = actor[0];
+        if (!isCustomer) {
+            customerId = chooseFromUsernames(scanner, "Choose customer: ");
+        }
+        String accountId = chooseFromAccounts(scanner, customerId, "Choose account: ");
+        printTransactions(transactionService.displayAllTransactions(
+                actor[0], customerId, accountId));
     }
 
 }

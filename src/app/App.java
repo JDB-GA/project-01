@@ -29,11 +29,9 @@ public class App {
                 startBanker(scanner, actorRecord);
 
             } else if (actorRecord[3].equals(Constants.UserRole.CUSTOMER.name())) {
-                System.out.println(Constants.UserRole.CUSTOMER.name());
+                startCustomer(scanner, actorRecord);
             }
 
-//            authService.resetPassword("54a3b54a-1874-4cc9-ba2d-e4d2858c303c", "something");
-//            this.dependencies.authService.logout(actorRecord[0]);
         } catch (Exception e) {
             AppLogger.error(Constants.GENERAL_ERROR, e);
         }
@@ -73,6 +71,44 @@ public class App {
             selectedOption.run();
 
             if (option == 7) {
+                running = false;
+            }
+        }
+
+    }
+
+    private void startCustomer(Scanner scanner, String[] actorRecord) {
+        Customer customer = new Customer(
+                dependencies.customerService,
+                dependencies.authService,
+                dependencies.accountRepository
+        );
+
+        Map<Integer, Runnable> options = customer.customerCaller(scanner, actorRecord);
+        boolean running = true;
+        while (running) {
+            System.out.println("""
+                    1. Withdraw
+                    2. Deposit
+                    3. Transfer
+                    4. Display transactions
+                    5. Reset password
+                    6. Logout
+                    """);
+
+            System.out.print("Choose option: ");
+            int option = Integer.parseInt(scanner.nextLine());
+
+            Runnable selectedOption = options.get(option);
+
+            if (selectedOption == null) {
+                System.out.println(Constants.GENERAL_ERROR);
+                continue;
+            }
+
+            selectedOption.run();
+
+            if (option == 6) {
                 running = false;
             }
         }

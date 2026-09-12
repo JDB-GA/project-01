@@ -95,27 +95,6 @@ public class Banker {
     }
 
 
-    private void displayTransactions(Scanner scanner, String[] actor) {
-        String customerId = common.chooseFromUsernames(
-                scanner,
-                "Choose customer: "
-        );
-
-        String accountId = common.chooseFromAccounts(
-                scanner,
-                customerId,
-                "Choose account: "
-        );
-
-        common.printTransactions(
-                bankerService.displayAllTransactions(
-                        actor[0],
-                        customerId,
-                        accountId
-                )
-        );
-    }
-
     private void createAccount(Scanner scanner, String[] actor) {
         String customerId = common.chooseFromUsernames(
                 scanner,
@@ -133,15 +112,6 @@ public class Banker {
         System.out.println(result);
     }
 
-
-    private void logout(String[] actor) {
-        boolean result = authService.logout(actor[0]);
-        if (result) {
-            System.out.println(Constants.LOGOUT_SUCCESSFUL);
-        }
-    }
-
-
     public Map<Integer, Runnable> bankerCaller(
             Scanner scanner,
             String[] actor
@@ -151,9 +121,9 @@ public class Banker {
                 2, () -> deposit(scanner, actor),
                 3, () -> transfer(scanner, actor),
                 4, () -> addCustomer(scanner, actor),
-                5, () -> displayTransactions(scanner, actor),
+                5, () -> common.displayTransactions(scanner, actor, bankerService, false),
                 6, () -> createAccount(scanner, actor),
-                7, () -> logout(actor)
+                7, () -> common.logout(actor)
         );
     }
 }
