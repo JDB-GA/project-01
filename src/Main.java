@@ -1,54 +1,31 @@
+import app.App;
+import app.Dependencies;
 import auth.AuthService;
-import general.Constants;
+import banker.BankerService;
+import repositories.AccountRepository;
 import repositories.AuthTrackerRepository;
+import repositories.TransactionRepository;
 import repositories.UserRepository;
-
-import java.util.Optional;
-import java.util.Scanner;
 
 public class Main {
 
     public static void main(String[] args) {
-        AuthService authService = new AuthService(
-                new UserRepository(),
-                new AuthTrackerRepository()
-        );
 
-        try (Scanner scanner = new Scanner(System.in)) {
-            authService.resetPassword("54a3b54a-1874-4cc9-ba2d-e4d2858c303c", "something");
-            Optional<String[]> actor = authenticateActor(authService, scanner);
+        App app = new App(getDependencies());
 
-            if (actor.isEmpty()) {
-                return;
-            }
-
-            String[] actorRecord = actor.get();
-            System.out.println("Welcome " + actorRecord[1] + " (" + actorRecord[3] + ")");
-
-            authService.logout(actorRecord[0]);
-        }
+        app.start();
     }
 
-    private static Optional<String[]> authenticateActor(
-            AuthService authService,
-            Scanner scanner
-    ) {
-        System.out.print("Username: ");
-        String username = scanner.nextLine().trim();
 
-        System.out.print("Password: ");
-        String password = scanner.nextLine();
+    private static Dependencies getDependencies() {
+        UserRepository userRepository = new UserRepository();
+        AuthTrackerRepository authTrackerRepository = new AuthTrackerRepository();
+        AuthService authService = new AuthService(userRepository, authTrackerRepository);
+        TransactionRepository transactionRepository = new TransactionRepository();
+        AccountRepository accountRepository = new AccountRepository();
+        BankerService bankerService = new BankerService(accountRepository, authService, transactionRepository);
 
-        String loginResult = authService.login(username, password);
-        System.out.println(loginResult);
-
-        if (!Constants.LOGIN_SUCCESSFUL.equals(loginResult)) {
-            return Optional.empty();
-        }
-
-        String[] actor = authService.getUserByUsername(username);
-        return actor.length == 0
-                ? Optional.empty()
-                : Optional.of(actor);
+        return new Dependencies(authService, userRepository, authTrackerRepository, bankerService, accountRepository);
     }
+
 }

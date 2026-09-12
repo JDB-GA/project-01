@@ -21,6 +21,10 @@ public class AuthTrackerRepository {
     }
 
     public void create(String userId) {
+        if (findByUserId(userId).length > 0) {
+            return;
+        }
+
         String row = String.join(
                 Constants.CSV_SEPARATOR,
                 Functions.generateUUID(),
@@ -30,6 +34,7 @@ public class AuthTrackerRepository {
                 Constants.EMPTY_STRING,
                 Functions.getNow()
         );
+
         Functions.addRow(Constants.AUTH_TRACKER_TABLE, List.of(row));
     }
 

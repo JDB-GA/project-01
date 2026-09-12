@@ -8,21 +8,21 @@ import general.Constants;
 import general.Functions;
 import repositories.AccountRepository;
 
-import java.util.List;
-
 public class BankerService extends TransactionService implements IBankerService {
 
-    private final AccountRepository accountRepository;
     private final AuthService authService;
 
     public BankerService(AccountRepository accountRepository, AuthService authService, TransactionRepository transactionRepository) {
         super(accountRepository, transactionRepository, authService);
-        this.accountRepository = accountRepository;
         this.authService = authService;
     }
 
     @Override
-    public String addCustomer(String username, String password, String initialAccountType) {
+    public String addCustomer(String actorId, String username, String password, String initialAccountType) {
+
+        if (!authService.checkRole(actorId, Constants.UserRole.BANKER.name())) {
+            return Constants.GENERAL_ERROR;
+        }
 
         String userId = authService.register(username, password, Constants.UserRole.CUSTOMER.name());
         if (userId.equals(Constants.ACCOUNT_ALREADY_EXISTS)) {
@@ -30,11 +30,15 @@ public class BankerService extends TransactionService implements IBankerService 
             return Constants.CUSTOMER_ALREADY_EXISTS;
         }
 
-        return createAccount(userId, initialAccountType);
+        return createAccount(actorId, userId, initialAccountType);
     }
 
     @Override
-    public String createAccount(String customerId, String accountType) {
+    public String createAccount(String actorId, String customerId, String accountType) {
+        if (!authService.checkRole(actorId, Constants.UserRole.BANKER.name())) {
+            return Constants.GENERAL_ERROR;
+        }
+
         try {
             if (checkAccountExists(customerId, accountType)) {
 
@@ -58,12 +62,5 @@ public class BankerService extends TransactionService implements IBankerService 
 
         return accountRepository.existsForCustomer(userId, accountType);
     }
-
-    @Override
-    public List<String[]> getAccounts() {
-
-        return accountRepository.findAll();
-    }
-
 
 }

@@ -4,25 +4,24 @@ import auth.AuthService;
 import general.Constants;
 import repositories.AccountRepository;
 import repositories.TransactionRepository;
+import common.CommonService;
 
 import java.util.List;
 
-public class TransactionService {
+public class TransactionService extends CommonService implements ITransactionService {
 
-    protected final AccountRepository accountRepository;
     protected final TransactionRepository transactionRepository;
-    private final AuthService authService;
-
     public TransactionService(AccountRepository accountRepository, TransactionRepository transactionRepository, AuthService authService) {
-        this.accountRepository = accountRepository;
+        super(authService, accountRepository);
         this.transactionRepository = transactionRepository;
-        this.authService = authService;
     }
 
+    @Override
     public boolean deposit(String userId, String accountId, double amount) {
         return deposit(userId, userId, accountId, amount);
     }
 
+    @Override
     public boolean deposit(String actorUserId, String accountOwnerId, String accountId, double amount) {
         if (isNotAuthorized(actorUserId, accountOwnerId)) return false;
         if (invalidAmount(amount)) return false;
@@ -39,11 +38,13 @@ public class TransactionService {
         return true;
     }
 
+    @Override
     public boolean withdraw(String userId, String accountId, double amount) {
 
         return withdraw(userId, userId, accountId, amount);
     }
 
+    @Override
     public boolean withdraw(String actorUserId, String accountOwnerId, String accountId, double amount) {
         if (invalidAmount(amount)) return false;
         if (isNotAuthorized(actorUserId, accountOwnerId)) return false;
@@ -74,10 +75,12 @@ public class TransactionService {
         return true;
     }
 
+    @Override
     public String transfer(String userIdFrom, String fromAccountId, String toAccountId, double amount) {
         return transfer(userIdFrom, userIdFrom, fromAccountId, toAccountId, amount);
     }
 
+    @Override
     public String transfer(
             String actorUserId,
             String fromAccountOwnerId,
@@ -138,10 +141,26 @@ public class TransactionService {
         return !(amount > 0);
     }
 
-    public List<String[]> displayAllTransactions(String accountId) {
+    @Override
+    public List<String[]> displayAllTransactions(
+            String actorId,
+            String customerId,
+            String accountId
+    ) {
+        if (isNotAuthorized(actorId, customerId)) {
+            return List.of();
+        }
+
+        String[] account = accountRepository.getUserAccount(accountId);
+
+        if (account.length == 0 || !account[1].equals(customerId)) {
+            return List.of();
+        }
+
         return transactionRepository.getTransactionTable()
                 .stream()
-                .filter(transaction -> transaction[1].equals(accountId)).toList();
+                .filter(transaction -> transaction[1].equals(accountId))
+                .toList();
     }
 
 }
