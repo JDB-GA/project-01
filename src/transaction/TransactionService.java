@@ -11,6 +11,7 @@ import java.util.List;
 public class TransactionService extends CommonService implements ITransactionService {
 
     protected final TransactionRepository transactionRepository;
+
     public TransactionService(AccountRepository accountRepository, TransactionRepository transactionRepository, AuthService authService) {
         super(authService, accountRepository);
         this.transactionRepository = transactionRepository;
@@ -33,7 +34,13 @@ public class TransactionService extends CommonService implements ITransactionSer
         commonDepositCheck(newBalance, account);
 
         accountRepository.updateBalance(accountId, String.valueOf(newBalance));
-        transactionRepository.save(accountId, Constants.TransactionType.DEPOSIT.name(), amount, Constants.EMPTY_STRING);
+        transactionRepository.save(
+                accountId,
+                Constants.TransactionType.DEPOSIT.name(),
+                amount,
+                Constants.EMPTY_STRING,
+                newBalance
+        );
 
         return true;
     }
@@ -58,8 +65,8 @@ public class TransactionService extends CommonService implements ITransactionSer
         ) {
             return false;
         } else if (currentBalance < amount) {
-            transactionRepository.save(accountId, Constants.TransactionType.OVERDRAFT_FEE.name(), Constants.OVERDRAFT_PENALTY_DEFAULT, Constants.EMPTY_STRING);
             currentBalance -= Constants.OVERDRAFT_PENALTY_DEFAULT;
+            transactionRepository.save(accountId, Constants.TransactionType.OVERDRAFT_FEE.name(), Constants.OVERDRAFT_PENALTY_DEFAULT, Constants.EMPTY_STRING, currentBalance);
             overdraftCount++;
             accountRepository.updateOverdraftCount(accountId, overdraftCount);
             if (overdraftCount >= 2) {
@@ -70,7 +77,7 @@ public class TransactionService extends CommonService implements ITransactionSer
         double newBalance = currentBalance - amount;
 
         accountRepository.updateBalance(accountId, String.valueOf(newBalance));
-        transactionRepository.save(accountId, Constants.TransactionType.WITHDRAW.name(), amount, Constants.EMPTY_STRING);
+        transactionRepository.save(accountId, Constants.TransactionType.WITHDRAW.name(), amount, Constants.EMPTY_STRING, newBalance);
 
         return true;
     }
@@ -122,7 +129,7 @@ public class TransactionService extends CommonService implements ITransactionSer
         commonDepositCheck(newBalance, account);
 
         accountRepository.updateBalance(accountId, String.valueOf(newBalance));
-        transactionRepository.save(accountId, Constants.TransactionType.DEPOSIT.name(), amount);
+        transactionRepository.save(accountId, Constants.TransactionType.DEPOSIT.name(), amount, newBalance);
 
         return true;
     }

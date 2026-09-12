@@ -87,15 +87,17 @@ public class CommonService implements ICommonService {
     }
 
     public void printTransactions(List<String[]> transactions) {
+        System.out.println("---------------------------------------------------");
         transactions.forEach(transaction ->
                 System.out.printf(
-                        "ID: %s | Type: %s | Amount: %s | Date: %s%n",
+                        "ID: %s | Type: %s | Amount: %s | New balance: %s | Date: %s%n",
                         transaction[0],
                         transaction[2],
                         transaction[3],
-                        transaction[6]
-                )
-        );
+                        transaction[4],
+                        transaction[7]
+                ));
+        System.out.println("---------------------------------------------------");
     }
 
 }
