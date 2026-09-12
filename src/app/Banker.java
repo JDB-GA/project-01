@@ -64,16 +64,17 @@ public class Banker {
     }
 
     private void transfer(Scanner scanner, String[] actor) {
-        String accountOwnerId = common.chooseFromUsernames(scanner, "Choose customer:");
-        String fromAccountId = common.chooseFromAccounts(scanner, accountOwnerId, "Choose source account:");
-        String toAccountId = common.chooseFromAccounts(scanner, accountOwnerId, "Choose destination account:");
+        String sourceAccountOwnerId = common.chooseFromUsernames(scanner, "Choose Source customer:");
+        String fromAccountId = common.chooseFromAccounts(scanner, sourceAccountOwnerId, "Choose source account:");
+        String destinationAccountOwnerId = common.chooseFromUsernames(scanner, "Choose Destination customer:");
+        String toAccountId = common.chooseFromAccounts(scanner, destinationAccountOwnerId, "Choose destination account:");
 
         System.out.print("Amount: ");
         double amount = Double.parseDouble(scanner.nextLine());
 
         String result = bankerService.transfer(
                 actor[0],
-                accountOwnerId,
+                sourceAccountOwnerId,
                 fromAccountId,
                 toAccountId,
                 amount
@@ -87,9 +88,8 @@ public class Banker {
         String username = scanner.nextLine();
         System.out.print("Customer Password: ");
         String password = scanner.nextLine();
-        System.out.print("Customer Initial Account Type: ");
-        String initialAccountType = scanner.nextLine();
 
+        String initialAccountType = common.chooseAccountType(scanner, "Customer Initial Account Type:").name();
         String result = this.bankerService.addCustomer(actor[0], username, password, initialAccountType);
         System.out.println(result);
     }
@@ -122,10 +122,7 @@ public class Banker {
                 "Choose customer: "
         );
 
-        System.out.print("Account type: ");
-        String accountType = scanner.nextLine()
-                .trim()
-                .toUpperCase();
+        String accountType = common.chooseAccountType(scanner, "Account Type:").name();
 
         String result = bankerService.createAccount(
                 actor[0],

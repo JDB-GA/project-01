@@ -5,6 +5,7 @@ import general.Constants;
 import repositories.AccountRepository;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Scanner;
 
@@ -55,6 +56,32 @@ public class CommonService implements ICommonService {
                     .findFirst();
 
             if (account.isPresent()) return account.get()[0];
+            System.out.println(Constants.INVALID_ACCOUNT_TYPE);
+        }
+    }
+
+    public Constants.AccountType chooseAccountType(
+            Scanner scanner,
+            String message
+    ) {
+        Map<String, Constants.AccountType> accountTypes = Map.of(
+                Constants.AccountType.SAVINGS.name(), Constants.AccountType.SAVINGS,
+                Constants.AccountType.CHECKING.name(), Constants.AccountType.CHECKING
+        );
+
+        while (true) {
+            System.out.println(" - SAVINGS");
+            System.out.println(" - CHECKING");
+            System.out.print(message);
+
+            String choice = scanner.nextLine();
+
+            Constants.AccountType accountType = accountTypes.get(choice.toUpperCase());
+
+            if (accountType != null) {
+                return accountType;
+            }
+
             System.out.println(Constants.INVALID_ACCOUNT_TYPE);
         }
     }
