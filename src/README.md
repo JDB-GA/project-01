@@ -28,6 +28,44 @@
     - Deactivate the account after 2 overdrafts; reactivate if the customer resolves the negative balance and pays the overdraft fees.
     - Example 1: account balance 50, user withdraws 100, account now is -50 and counts -35 fees, overdraft count: 1
     - Example 2: account balance -85, user withdraws 20, account now is -115 and counts overdraft fees → -150, overdraft count: 2 & disable account.
+- Display Transaction Data (requires login)
+- Track all transactions for a customer in a separate file.
+- Display transaction history including date, type, and post-transaction balance.
+- Hashed Password.
+
+
+
+# Banker Test Senarios
+- 3 Failed Login
+- Check disabled account
+- Wait 31 seconds
+- Correct Login
+- Add customer 1 (savings)
+- Add customer 2 (checking)
+- Create savings account (customer 1) - Prevent dupliacated account type
+- Create checking account (customer 1)
+- Create savings account (customer 2)
+- Withdraw 1
+- Withdraw 2
+- Overdraft 2 times to make it disabled
+- Deposit (bring the balance back to zero)
+- Verify account disabled to active
+- Deposit more
+- Transfer from customer 1 to customer 2
+- Display transactions
+- Logout
+
+
+# Customer Test Senarios
+- Login as customer
+- Deposit money
+- Withdraw money
+- Reject invalid amount
+- Reject unauthorized account access
+- Transfer money to another customer
+- Display customer transactions
+- Reset password
+- Logout
 
 
 
