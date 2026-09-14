@@ -132,7 +132,7 @@ public class AuthService implements IAuthService {
     public void countFailedAttempts(String userId) {
         String[] authTracker = getAuthTrackerByUserId(userId);
         int failedAttempts = authTracker.length == 0 ? 1 : Integer.parseInt(authTracker[3]) + 1;
-        String lockedUntil = failedAttempts >= 3 ? LocalDateTime.now().plusSeconds(30).toString() : Constants.EMPTY_STRING;
+        String lockedUntil = failedAttempts >= 3 ? LocalDateTime.now().plusSeconds(60).toString() : Constants.EMPTY_STRING;
 
         if (authTracker.length == 0) {
             authTrackerRepository.createFailedAttempt(userId, failedAttempts, lockedUntil);

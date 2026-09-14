@@ -2,6 +2,7 @@ package general;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.format.DateTimeFormatter;
 
 public class Constants {
     public enum UserRole {
@@ -78,6 +79,27 @@ public class Constants {
     public static final String ACCOUNT_NOT_FOUND = "Account not found";
     public static final String CARD_ALREADY_EXISTS = "This account already has a debit card";
     public static final String INVALID_CARD_TYPE = "Invalid card type. Try again.";
+    public static final String TRANSACTION_FILTER_TITLE = "Filter transactions:";
+    public static final String TRANSACTION_FILTER_TODAY = "Today";
+    public static final String TRANSACTION_FILTER_YESTERDAY = "Yesterday";
+    public static final String TRANSACTION_FILTER_LAST_7_DAYS = "Last 7 days";
+    public static final String TRANSACTION_FILTER_LAST_30_DAYS = "Last 30 days";
+    public static final String TRANSACTION_FILTER_THIS_MONTH = "This month";
+    public static final String TRANSACTION_FILTER_CUSTOM = "Custom date/time range";
+    public static final String TRANSACTION_FILTER_BACK = "Back";
+    public static final String TRANSACTION_CUSTOM_RANGE_FORMAT = "yyyy-MM-dd HH:mm/yyyy-MM-dd HH:mm";
+    public static final String TRANSACTION_CUSTOM_RANGE_PROMPT =
+            "Enter range (yyyy-MM-dd HH:mm/yyyy-MM-dd HH:mm): ";
+    public static final String INVALID_TRANSACTION_RANGE = "Invalid range. Try again.";
+    public static final DateTimeFormatter TRANSACTION_DATE_TIME_FORMATTER =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+    public static final int TRANSACTION_FILTER_TODAY_OPTION = 1;
+    public static final int TRANSACTION_FILTER_YESTERDAY_OPTION = 2;
+    public static final int TRANSACTION_FILTER_LAST_7_DAYS_OPTION = 3;
+    public static final int TRANSACTION_FILTER_LAST_30_DAYS_OPTION = 4;
+    public static final int TRANSACTION_FILTER_THIS_MONTH_OPTION = 5;
+    public static final int TRANSACTION_FILTER_CUSTOM_OPTION = 6;
+    public static final int TRANSACTION_FILTER_BACK_OPTION = 7;
 
 
     public static final Path USER_TABLE = Paths.get("src", "database", "users.csv");

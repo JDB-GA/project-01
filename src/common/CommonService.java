@@ -9,6 +9,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Scanner;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.YearMonth;
+import java.time.format.DateTimeParseException;
 
 public class CommonService implements ICommonService {
 
@@ -119,8 +123,65 @@ public class CommonService implements ICommonService {
             customerId = chooseFromUsernames(scanner, "Choose customer: ");
         }
         String accountId = chooseFromAccounts(scanner, customerId, "Choose account: ");
-        printTransactions(transactionService.displayAllTransactions(
-                actor[0], customerId, accountId));
+        List<String[]> transactions = transactionService.displayAllTransactions(
+                actor[0], customerId, accountId);
+        printTransactions(filterTransactions(scanner, transactions));
+    }
+
+    private List<String[]> filterTransactions(Scanner scanner, List<String[]> transactions) {
+        while (true) {
+            System.out.println(Constants.TRANSACTION_FILTER_TITLE);
+            System.out.println(Constants.TRANSACTION_FILTER_TODAY_OPTION + ". " + Constants.TRANSACTION_FILTER_TODAY);
+            System.out.println(Constants.TRANSACTION_FILTER_YESTERDAY_OPTION + ". " + Constants.TRANSACTION_FILTER_YESTERDAY);
+            System.out.println(Constants.TRANSACTION_FILTER_LAST_7_DAYS_OPTION + ". " + Constants.TRANSACTION_FILTER_LAST_7_DAYS);
+            System.out.println(Constants.TRANSACTION_FILTER_LAST_30_DAYS_OPTION + ". " + Constants.TRANSACTION_FILTER_LAST_30_DAYS);
+            System.out.println(Constants.TRANSACTION_FILTER_THIS_MONTH_OPTION + ". " + Constants.TRANSACTION_FILTER_THIS_MONTH);
+            System.out.println(Constants.TRANSACTION_FILTER_CUSTOM_OPTION + ". " + Constants.TRANSACTION_FILTER_CUSTOM);
+            System.out.println(Constants.TRANSACTION_FILTER_BACK_OPTION + ". " + Constants.TRANSACTION_FILTER_BACK);
+            System.out.print("Choose option: ");
+
+            String choice = scanner.nextLine().trim();
+            LocalDateTime now = LocalDateTime.now();
+            LocalDateTime start;
+            LocalDateTime end = now;
+
+            try {
+                int option = Integer.parseInt(choice);
+                switch (option) {
+                    case Constants.TRANSACTION_FILTER_TODAY_OPTION -> start = now.toLocalDate().atStartOfDay();
+                    case Constants.TRANSACTION_FILTER_YESTERDAY_OPTION -> {
+                        LocalDate yesterday = now.toLocalDate().minusDays(1);
+                        start = yesterday.atStartOfDay();
+                        end = yesterday.plusDays(1).atStartOfDay();
+                    }
+                    case Constants.TRANSACTION_FILTER_LAST_7_DAYS_OPTION -> start = now.minusDays(7);
+                    case Constants.TRANSACTION_FILTER_LAST_30_DAYS_OPTION -> start = now.minusDays(30);
+                    case Constants.TRANSACTION_FILTER_THIS_MONTH_OPTION -> start = YearMonth.from(now).atDay(1).atStartOfDay();
+                    case Constants.TRANSACTION_FILTER_CUSTOM_OPTION -> {
+                        System.out.print(Constants.TRANSACTION_CUSTOM_RANGE_PROMPT);
+                        String[] values = scanner.nextLine().trim().split("/", 2);
+                        if (values.length != 2) throw new DateTimeParseException("Invalid range", "", 0);
+                        start = LocalDateTime.parse(values[0], Constants.TRANSACTION_DATE_TIME_FORMATTER);
+                        end = LocalDateTime.parse(values[1], Constants.TRANSACTION_DATE_TIME_FORMATTER);
+                        if (!start.isBefore(end)) throw new DateTimeParseException("Invalid range", "", 0);
+                    }
+                    case Constants.TRANSACTION_FILTER_BACK_OPTION -> { return transactions; }
+                    default -> throw new DateTimeParseException("Invalid option", choice, 0);
+                }
+                LocalDateTime rangeStart = start;
+                LocalDateTime rangeEnd = end;
+                return transactions.stream()
+                        .filter(transaction -> isWithinRange(transaction, rangeStart, rangeEnd))
+                        .toList();
+            } catch (NumberFormatException | DateTimeParseException exception) {
+                System.out.println(Constants.INVALID_TRANSACTION_RANGE);
+            }
+        }
+    }
+
+    private boolean isWithinRange(String[] transaction, LocalDateTime start, LocalDateTime end) {
+        LocalDateTime createdAt = LocalDateTime.parse(transaction[7]);
+        return !createdAt.isBefore(start) && createdAt.isBefore(end);
     }
 
     @Override

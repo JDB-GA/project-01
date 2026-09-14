@@ -54,7 +54,7 @@ class BankerServiceTest {
                 auth.login(bankerUsername, bankerPassword)
         );
 
-        Thread.sleep(31_000);
+        Thread.sleep(61_000);
 
         assertEquals(
                 Constants.LOGIN_SUCCESSFUL,
