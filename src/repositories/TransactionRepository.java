@@ -36,4 +36,23 @@ public class TransactionRepository {
     public List<String[]> getTransactionTable() {
         return Functions.getTable(Constants.TRANSACTION_TABLE);
     }
+
+    public double getTodayTotal(
+            String accountId,
+            String transactionType
+    ) {
+        String today = Functions.getNow().substring(0, 10);
+
+        return getTransactionTable()
+                .stream()
+                .filter(transaction ->
+                        transaction[1].equals(accountId)
+                                && transaction[2].equals(transactionType)
+                                && transaction[7].startsWith(today)
+                )
+                .mapToDouble(transaction ->
+                        Double.parseDouble(transaction[3])
+                )
+                .sum();
+    }
 }

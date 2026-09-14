@@ -123,4 +123,32 @@ public class CommonService implements ICommonService {
                 actor[0], customerId, accountId));
     }
 
+    @Override
+    public Constants.CardType chooseCardType(
+            Scanner scanner,
+            String message
+    ) {
+        Map<String, Constants.CardType> cardTypes = Map.of(
+                "1", Constants.CardType.MASTERCARD,
+                "2", Constants.CardType.MASTERCARD_TITANIUM,
+                "3", Constants.CardType.MASTERCARD_PLATINUM
+        );
+
+        while (true) {
+            System.out.println("1. Mastercard");
+            System.out.println("2. Mastercard Titanium");
+            System.out.println("3. Mastercard Platinum");
+            System.out.print(message);
+
+            Constants.CardType selected =
+                    cardTypes.get(scanner.nextLine().trim());
+
+            if (selected != null) {
+                return selected;
+            }
+
+            System.out.println(Constants.INVALID_CARD_TYPE);
+        }
+    }
+
 }

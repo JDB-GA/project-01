@@ -17,8 +17,32 @@ public class Constants {
     }
 
     public enum TransactionType {
-        DEPOSIT, WITHDRAW, TRANSFER, OVERDRAFT_FEE
+        DEPOSIT,
+        WITHDRAW,
+        TRANSFER_OUT,
+        TRANSFER_IN,
+        OVERDRAFT_FEE
     }
+
+
+    public enum CardType {
+        MASTERCARD, MASTERCARD_TITANIUM, MASTERCARD_PLATINUM
+    }
+
+    public static final double MASTERCARD_WITHDRAW_LIMIT = 5_000;
+    public static final double MASTERCARD_TRANSFER_LIMIT = 10_000;
+    public static final double MASTERCARD_OWN_TRANSFER_LIMIT = 20_000;
+
+    public static final double TITANIUM_WITHDRAW_LIMIT = 10_000;
+    public static final double TITANIUM_TRANSFER_LIMIT = 20_000;
+    public static final double TITANIUM_OWN_TRANSFER_LIMIT = 40_000;
+
+    public static final double PLATINUM_WITHDRAW_LIMIT = 20_000;
+    public static final double PLATINUM_TRANSFER_LIMIT = 40_000;
+    public static final double PLATINUM_OWN_TRANSFER_LIMIT = 80_000;
+
+    public static final double CARD_DEPOSIT_LIMIT = 100_000;
+    public static final double CARD_OWN_DEPOSIT_LIMIT = 200_000;
 
     public static final int OVERDRAFT_COUNT_DEFAULT = 0;
     public static final int OVERDRAFT_PENALTY_DEFAULT = 35;
@@ -29,6 +53,7 @@ public class Constants {
     public static final String FALSE = "false";
     public static final String ZERO = "0";
 
+    public static final String CARD_CREATED_SUCCESSFULLY = "Debit card created successfully";
     public static final String BALANCE_UPDATE_SUCCESS = "The balance updated successfully!";
     public static final String PASSWORD_UPDATE_SUCCESS = "The password reset successfully!";
     public static final String TABLE_WRITE_ERROR = "An error occurred while updating table field";
@@ -50,14 +75,20 @@ public class Constants {
     public static final String CUSTOMER_ALREADY_EXISTS = "The Customer already exists! Use create account instead!";
     public static final String ACCOUNT_ALREADY_EXISTS_FOR_CUSTOMER = " account already exists for this customer";
     public static final String ACCOUNT_CREATED_FOR_CUSTOMER = " account created for this customer of Id: ";
+    public static final String ACCOUNT_NOT_FOUND = "Account not found";
+    public static final String CARD_ALREADY_EXISTS = "This account already has a debit card";
+    public static final String INVALID_CARD_TYPE = "Invalid card type. Try again.";
+
 
     public static final Path USER_TABLE = Paths.get("src", "database", "users.csv");
     public static final Path ACCOUNT_TABLE = Paths.get("src", "database", "accounts.csv");
     public static final Path TRANSACTION_TABLE = Paths.get("src", "database", "transactions.csv");
     public static final Path AUTH_TRACKER_TABLE = Paths.get("src", "database", "auth_tracker.csv");
+    public static final Path DEBIT_CARD_TABLE = Paths.get("src", "database", "debit_cards.csv");
 
     public static final String TRANSACTION_TABLE_HEADER = String.join(CSV_SEPARATOR, "ID", "ACCOUNT_ID", "TRANSACTION_TYPE", "AMOUNT", "NEW_BALANCE", "DESCRIPTION", "RELATED_ACCOUNT_ID", "CREATED_AT");
     public static final String USER_TABLE_HEADER = String.join(CSV_SEPARATOR, "ID", "USERNAME", "HASHED_PASSWORD", "ROLE", "CREATED_AT");
     public static final String ACCOUNT_TABLE_HEADER = String.join(CSV_SEPARATOR, "ID", "CUSTOMER_ID", "ACCOUNT_TYPE", "BALANCE", "STATUS", "OVERDRAFT_COUNT", "CREATED_AT");
     public static final String AUTH_TRACKER_TABLE_HEADER = String.join(CSV_SEPARATOR, "ID", "USER_ID", "IS_LOGGED_IN", "FAILED_ATTEMPTS", "LOCKED_UNTIL", "UPDATED_AT");
+    public static final String DEBIT_CARD_TABLE_HEADER = String.join(CSV_SEPARATOR, "ID", "ACCOUNT_ID", "CARD_TYPE", "CREATED_AT");
 }

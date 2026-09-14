@@ -5,16 +5,19 @@ import general.Constants;
 import repositories.AccountRepository;
 import repositories.TransactionRepository;
 import common.CommonService;
+import card.CardLimitService;
 
 import java.util.List;
 
 public class TransactionService extends CommonService implements ITransactionService {
 
     protected final TransactionRepository transactionRepository;
+    private final CardLimitService cardLimitService;
 
-    public TransactionService(AccountRepository accountRepository, TransactionRepository transactionRepository, AuthService authService) {
+    public TransactionService(AccountRepository accountRepository, TransactionRepository transactionRepository, AuthService authService, CardLimitService cardLimitService) {
         super(authService, accountRepository);
         this.transactionRepository = transactionRepository;
+        this.cardLimitService = cardLimitService;
     }
 
     @Override
@@ -26,6 +29,7 @@ public class TransactionService extends CommonService implements ITransactionSer
     public boolean deposit(String actorUserId, String accountOwnerId, String accountId, double amount) {
         if (isNotAuthorized(actorUserId, accountOwnerId)) return false;
         if (invalidAmount(amount)) return false;
+        if (!cardLimitService.canDeposit(accountId, amount, actorUserId.equals(accountOwnerId))) return false;
 
         String[] account = accountRepository.getUserAccount(accountId);
         double currentBalance = Double.parseDouble(account[3]);
@@ -51,10 +55,20 @@ public class TransactionService extends CommonService implements ITransactionSer
         return withdraw(userId, userId, accountId, amount);
     }
 
-    @Override
-    public boolean withdraw(String actorUserId, String accountOwnerId, String accountId, double amount) {
+    private boolean withdrawFromAccount(
+            String actorUserId,
+            String accountOwnerId,
+            String accountId,
+            double amount,
+            Constants.TransactionType transactionType,
+            String relatedAccountId
+    ) {
         if (invalidAmount(amount)) return false;
         if (isNotAuthorized(actorUserId, accountOwnerId)) return false;
+        if (transactionType == Constants.TransactionType.WITHDRAW
+                && !cardLimitService.canWithdraw(accountId, amount)) {
+            return false;
+        }
 
         String[] userAccount = accountRepository.getUserAccount(accountId);
         double currentBalance = Double.parseDouble(userAccount[3]);
@@ -77,7 +91,7 @@ public class TransactionService extends CommonService implements ITransactionSer
         double newBalance = currentBalance - amount;
 
         accountRepository.updateBalance(accountId, String.valueOf(newBalance));
-        transactionRepository.save(accountId, Constants.TransactionType.WITHDRAW.name(), amount, Constants.EMPTY_STRING, newBalance);
+        transactionRepository.save(accountId, transactionType.name(), amount, relatedAccountId, newBalance);
 
         return true;
     }
@@ -85,6 +99,23 @@ public class TransactionService extends CommonService implements ITransactionSer
     @Override
     public String transfer(String userIdFrom, String fromAccountId, String toAccountId, double amount) {
         return transfer(userIdFrom, userIdFrom, fromAccountId, toAccountId, amount);
+    }
+
+    @Override
+    public boolean withdraw(
+            String actorUserId,
+            String accountOwnerId,
+            String accountId,
+            double amount
+    ) {
+        return withdrawFromAccount(
+                actorUserId,
+                accountOwnerId,
+                accountId,
+                amount,
+                Constants.TransactionType.WITHDRAW,
+                Constants.EMPTY_STRING
+        );
     }
 
     @Override
@@ -97,8 +128,27 @@ public class TransactionService extends CommonService implements ITransactionSer
     ) {
         if (isNotAuthorized(actorUserId, fromAccountOwnerId)) return Constants.GENERAL_ERROR;
 
-        if (withdraw(actorUserId, fromAccountOwnerId, fromAccountId, amount)
-                && depositToAccount(toAccountId, amount)) {
+        String[] destinationAccount = accountRepository.getUserAccount(toAccountId);
+        if (destinationAccount.length == 0) return Constants.GENERAL_ERROR;
+
+        boolean ownAccount = fromAccountOwnerId.equals(destinationAccount[1]);
+        if (!cardLimitService.canTransfer(fromAccountId, amount, ownAccount)) {
+            return Constants.GENERAL_ERROR;
+        }
+
+        if (withdrawFromAccount(
+                actorUserId,
+                fromAccountOwnerId,
+                fromAccountId,
+                amount,
+                Constants.TransactionType.TRANSFER_OUT,
+                toAccountId
+        ) && depositToAccount(
+                toAccountId,
+                amount,
+                Constants.TransactionType.TRANSFER_IN,
+                fromAccountId
+        )) {
             return Constants.BALANCE_UPDATE_SUCCESS;
         }
 
@@ -119,7 +169,12 @@ public class TransactionService extends CommonService implements ITransactionSer
         return !isAccountOwner && !isBanker;
     }
 
-    private boolean depositToAccount(String accountId, double amount) {
+    private boolean depositToAccount(
+            String accountId,
+            double amount,
+            Constants.TransactionType transactionType,
+            String relatedAccountId
+    ) {
         if (invalidAmount(amount)) return false;
         String[] account = accountRepository.getUserAccount(accountId);
         if (account.length == 0) return false;
@@ -129,7 +184,7 @@ public class TransactionService extends CommonService implements ITransactionSer
         commonDepositCheck(newBalance, account);
 
         accountRepository.updateBalance(accountId, String.valueOf(newBalance));
-        transactionRepository.save(accountId, Constants.TransactionType.DEPOSIT.name(), amount, newBalance);
+        transactionRepository.save(accountId, transactionType.name(), amount, relatedAccountId, newBalance);
 
         return true;
     }

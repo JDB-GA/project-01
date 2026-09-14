@@ -90,7 +90,8 @@ public class Banker {
         String password = scanner.nextLine();
 
         String initialAccountType = common.chooseAccountType(scanner, "Customer Initial Account Type:").name();
-        String result = this.bankerService.addCustomer(actor[0], username, password, initialAccountType);
+        Constants.CardType cardType = common.chooseCardType(scanner, "Choose card type: ");
+        String result = this.bankerService.addCustomer(actor[0], username, password, initialAccountType, cardType);
         System.out.println(result);
     }
 
@@ -102,11 +103,13 @@ public class Banker {
         );
 
         String accountType = common.chooseAccountType(scanner, "Account Type:").name();
+        Constants.CardType cardType = common.chooseCardType(scanner, "Choose card type: ");
 
         String result = bankerService.createAccount(
                 actor[0],
                 customerId,
-                accountType
+                accountType,
+                cardType
         );
 
         System.out.println(result);

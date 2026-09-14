@@ -2,13 +2,12 @@ package test;
 
 import auth.AuthService;
 import banker.BankerService;
+import card.CardService;
+import card.CardLimitService;
 import customer.CustomerService;
 import general.Constants;
 import org.junit.jupiter.api.Test;
-import repositories.AccountRepository;
-import repositories.AuthTrackerRepository;
-import repositories.TransactionRepository;
-import repositories.UserRepository;
+import repositories.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -22,7 +21,10 @@ class CustomerServiceTest {
         TransactionRepository transactionHistory = new TransactionRepository();
 
         AuthService auth = new AuthService(users, loginTracker);
-        BankerService banker = new BankerService(accounts, auth, transactionHistory);
+        CardRepository cards = new CardRepository();
+        CardService cardService = new CardService(cards, accounts);
+        CardLimitService cardLimits = new CardLimitService(cardService, transactionHistory);
+        BankerService banker = new BankerService(accounts, auth, transactionHistory, cardService, cardLimits);
 
         String setupBanker =
                 "testSetupBanker" + System.currentTimeMillis();
@@ -50,14 +52,16 @@ class CustomerServiceTest {
                 bankerId,
                 customerUsername,
                 "password",
-                Constants.AccountType.CHECKING.name()
+                Constants.AccountType.CHECKING.name(),
+                Constants.CardType.MASTERCARD
         );
 
         banker.addCustomer(
                 bankerId,
                 otherCustomerUsername,
                 "password",
-                Constants.AccountType.SAVINGS.name()
+                Constants.AccountType.SAVINGS.name(),
+                Constants.CardType.MASTERCARD_TITANIUM
         );
 
         String customerId =
@@ -86,7 +90,7 @@ class CustomerServiceTest {
         );
 
         CustomerService customer =
-                new CustomerService(accounts, transactionHistory, auth);
+                new CustomerService(accounts, transactionHistory, auth, cardLimits);
 
         assertTrue(
                 customer.deposit(
@@ -118,6 +122,50 @@ class CustomerServiceTest {
                         otherCustomerId,
                         otherAccount,
                         10
+                )
+        );
+
+        assertFalse(
+                customer.deposit(
+                        customerId,
+                        customerAccount,
+                        Constants.CARD_OWN_DEPOSIT_LIMIT
+                )
+        );
+
+        assertFalse(
+                customer.withdraw(
+                        customerId,
+                        customerAccount,
+                        Constants.MASTERCARD_WITHDRAW_LIMIT
+                )
+        );
+
+        assertTrue(
+                customer.deposit(
+                        customerId,
+                        customerAccount,
+                        6_000
+                )
+        );
+
+        assertEquals(
+                Constants.BALANCE_UPDATE_SUCCESS,
+                customer.transfer(
+                        customerId,
+                        customerAccount,
+                        otherAccount,
+                        6_000
+                )
+        );
+
+        assertEquals(
+                Constants.GENERAL_ERROR,
+                customer.transfer(
+                        customerId,
+                        customerAccount,
+                        otherAccount,
+                        4_001
                 )
         );
 

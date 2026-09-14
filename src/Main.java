@@ -2,11 +2,10 @@ import app.App;
 import app.Dependencies;
 import auth.AuthService;
 import banker.BankerService;
+import card.CardService;
+import card.CardLimitService;
 import customer.CustomerService;
-import repositories.AccountRepository;
-import repositories.AuthTrackerRepository;
-import repositories.TransactionRepository;
-import repositories.UserRepository;
+import repositories.*;
 
 public class Main {
 
@@ -24,15 +23,20 @@ public class Main {
         AuthService authService = new AuthService(userRepository, authTrackerRepository);
         TransactionRepository transactionRepository = new TransactionRepository();
         AccountRepository accountRepository = new AccountRepository();
-        BankerService bankerService = new BankerService(accountRepository, authService, transactionRepository);
-        CustomerService customerService = new CustomerService(accountRepository, transactionRepository, authService);
+        CardRepository cardRepository = new CardRepository();
+        CardService cardService = new CardService(cardRepository, accountRepository);
+        CardLimitService cardLimitService = new CardLimitService(cardService, transactionRepository);
+        BankerService bankerService = new BankerService(accountRepository, authService, transactionRepository, cardService, cardLimitService);
+        CustomerService customerService = new CustomerService(accountRepository, transactionRepository, authService, cardLimitService);
 
         return new Dependencies(authService,
                 userRepository,
                 authTrackerRepository,
                 bankerService,
                 accountRepository,
-                customerService
+                customerService,
+                cardService,
+                cardRepository
         );
     }
 

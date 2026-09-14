@@ -1,5 +1,7 @@
 package banker;
 
+import card.CardService;
+import card.CardLimitService;
 import repositories.TransactionRepository;
 import transaction.TransactionService;
 import auth.AuthService;
@@ -11,14 +13,16 @@ import repositories.AccountRepository;
 public class BankerService extends TransactionService implements IBankerService {
 
     private final AuthService authService;
+    private final CardService cardService;
 
-    public BankerService(AccountRepository accountRepository, AuthService authService, TransactionRepository transactionRepository) {
-        super(accountRepository, transactionRepository, authService);
+    public BankerService(AccountRepository accountRepository, AuthService authService, TransactionRepository transactionRepository, CardService cardService, CardLimitService cardLimitService) {
+        super(accountRepository, transactionRepository, authService, cardLimitService);
         this.authService = authService;
+        this.cardService = cardService;
     }
 
     @Override
-    public String addCustomer(String actorId, String username, String password, String initialAccountType) {
+    public String addCustomer(String actorId, String username, String password, String initialAccountType, Constants.CardType cardType) {
 
         if (!authService.checkRole(actorId, Constants.UserRole.BANKER.name())) {
             return Constants.GENERAL_ERROR;
@@ -30,11 +34,11 @@ public class BankerService extends TransactionService implements IBankerService 
             return Constants.CUSTOMER_ALREADY_EXISTS;
         }
 
-        return createAccount(actorId, userId, initialAccountType);
+        return createAccount(actorId, userId, initialAccountType, cardType);
     }
 
     @Override
-    public String createAccount(String actorId, String customerId, String accountType) {
+    public String createAccount(String actorId, String customerId, String accountType, Constants.CardType cardType) {
         if (!authService.checkRole(actorId, Constants.UserRole.BANKER.name())) {
             return Constants.GENERAL_ERROR;
         }
@@ -50,6 +54,10 @@ public class BankerService extends TransactionService implements IBankerService 
             double balance = Constants.ACCOUNT_BALANCE_DEFAULT;
             int overdraftCount = Constants.OVERDRAFT_COUNT_DEFAULT;
             accountRepository.save(id, customerId, accountType, balance, status, overdraftCount, now);
+            String cardResult = cardService.assignCard(id, cardType);
+            if (!Constants.CARD_CREATED_SUCCESSFULLY.equals(cardResult)) {
+                return cardResult;
+            }
         } catch (Exception e) {
             AppLogger.error(Constants.GENERAL_ERROR, e);
         }

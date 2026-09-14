@@ -2,12 +2,11 @@ package test;
 
 import auth.AuthService;
 import banker.BankerService;
+import card.CardService;
+import card.CardLimitService;
 import general.Constants;
 import org.junit.jupiter.api.Test;
-import repositories.AccountRepository;
-import repositories.AuthTrackerRepository;
-import repositories.TransactionRepository;
-import repositories.UserRepository;
+import repositories.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -21,7 +20,10 @@ class BankerServiceTest {
         TransactionRepository transactionHistory = new TransactionRepository();
 
         AuthService auth = new AuthService(users, loginTracker);
-        BankerService banker = new BankerService(accounts, auth, transactionHistory);
+        CardRepository cards = new CardRepository();
+        CardService cardService = new CardService(cards, accounts);
+        CardLimitService cardLimits = new CardLimitService(cardService, transactionHistory);
+        BankerService banker = new BankerService(accounts, auth, transactionHistory, cardService, cardLimits);
 
         String bankerUsername = "testBanker" + System.currentTimeMillis();
         String bankerPassword = "bankerPassword";
@@ -72,7 +74,8 @@ class BankerServiceTest {
                         bankerId,
                         customerOneUsername,
                         "password",
-                        Constants.AccountType.SAVINGS.name()
+                        Constants.AccountType.SAVINGS.name(),
+                        Constants.CardType.MASTERCARD_PLATINUM
                 ).contains("created")
         );
 
@@ -81,7 +84,8 @@ class BankerServiceTest {
                         bankerId,
                         customerTwoUsername,
                         "password",
-                        Constants.AccountType.CHECKING.name()
+                        Constants.AccountType.CHECKING.name(),
+                        Constants.CardType.MASTERCARD_TITANIUM
                 ).contains("created")
         );
 
@@ -95,7 +99,8 @@ class BankerServiceTest {
                 banker.createAccount(
                         bankerId,
                         customerOneId,
-                        Constants.AccountType.SAVINGS.name()
+                        Constants.AccountType.SAVINGS.name(),
+                        Constants.CardType.MASTERCARD_PLATINUM
                 ).contains("already exists")
         );
 
@@ -103,7 +108,8 @@ class BankerServiceTest {
                 banker.createAccount(
                         bankerId,
                         customerOneId,
-                        Constants.AccountType.CHECKING.name()
+                        Constants.AccountType.CHECKING.name(),
+                        Constants.CardType.MASTERCARD
                 ).contains("created")
         );
 
@@ -111,7 +117,8 @@ class BankerServiceTest {
                 banker.createAccount(
                         bankerId,
                         customerTwoId,
-                        Constants.AccountType.SAVINGS.name()
+                        Constants.AccountType.SAVINGS.name(),
+                        Constants.CardType.MASTERCARD
                 ).contains("created")
         );
 
@@ -125,6 +132,30 @@ class BankerServiceTest {
                 accounts,
                 customerTwoId,
                 Constants.AccountType.CHECKING.name()
+        );
+
+        assertTrue(cards.existsForAccount(sourceAccount));
+
+        assertEquals(
+                Constants.CardType.MASTERCARD_PLATINUM,
+                cardService.getCardByAccountId(sourceAccount)
+                        .orElseThrow()
+                        .getCardType()
+        );
+
+        assertEquals(
+                Constants.CARD_ALREADY_EXISTS,
+                cardService.assignCard(
+                        sourceAccount,
+                        Constants.CardType.MASTERCARD
+                )
+        );
+
+        assertEquals(
+                Constants.CardType.MASTERCARD_TITANIUM,
+                cardService.getCardByAccountId(destinationAccount)
+                        .orElseThrow()
+                        .getCardType()
         );
 
         assertTrue(

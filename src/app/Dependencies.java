@@ -6,6 +6,8 @@ import customer.CustomerService;
 import repositories.AccountRepository;
 import repositories.AuthTrackerRepository;
 import repositories.UserRepository;
+import card.CardService;
+import repositories.CardRepository;
 
 public class Dependencies {
     UserRepository userRepository;
@@ -14,6 +16,8 @@ public class Dependencies {
     BankerService bankerService;
     AccountRepository accountRepository;
     CustomerService customerService;
+    CardService cardService;
+    CardRepository cardRepository;
 
     public Dependencies
             (AuthService authService,
@@ -21,7 +25,9 @@ public class Dependencies {
              AuthTrackerRepository authTrackerRepository,
              BankerService bankerService,
              AccountRepository accountRepository,
-             CustomerService customerService
+             CustomerService customerService,
+             CardService cardService,
+             CardRepository cardRepository
             ) {
         this.userRepository = userRepository;
         this.authTrackerRepository = authTrackerRepository;
@@ -29,6 +35,8 @@ public class Dependencies {
         this.bankerService = bankerService;
         this.accountRepository = accountRepository;
         this.customerService = customerService;
+        this.cardService = cardService;
+        this.cardRepository = cardRepository;
     }
 
 }

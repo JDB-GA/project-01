@@ -2,6 +2,8 @@ package common;
 
 import java.util.List;
 import java.util.Scanner;
+
+import general.Constants;
 import transaction.ITransactionService;
 
 public interface ICommonService {
@@ -16,5 +18,10 @@ public interface ICommonService {
             String[] actor,
             ITransactionService transactionService,
             boolean isCustomer
+    );
+
+    Constants.CardType chooseCardType(
+            Scanner scanner,
+            String message
     );
 }
