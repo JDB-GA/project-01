@@ -71,6 +71,10 @@ public class Constants {
     public static final String LOGOUT_SUCCESSFUL = "Logout successful";
     public static final String DEPOSIT_SUCCESS = "Account deposit success !";
     public static final String WITHDRAW_SUCCESS = "Account withdraw success !";
+    public static final String DEPOSIT_LIMIT_ERROR =
+            GENERAL_ERROR + " deposit Limit Reached Operation cannot be done !";
+    public static final String WITHDRAW_LIMIT_ERROR =
+            GENERAL_ERROR + " withdraw Limit Reached Operation cannot be done !";
     public static final String ACCOUNT_ALREADY_EXISTS = "The account already exists!";
     public static final String REGISTRATION_ERROR = "An error occurred during user registration";
     public static final String CUSTOMER_ALREADY_EXISTS = "The Customer already exists! Use create account instead!";

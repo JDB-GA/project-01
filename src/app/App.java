@@ -91,7 +91,7 @@ public class App {
                     1. Withdraw
                     2. Deposit
                     3. Transfer
-                    4. Display transactions
+                    4. Display transactions | Account statement
                     5. Reset password
                     6. Logout
                     """);

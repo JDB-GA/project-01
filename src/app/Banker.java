@@ -28,18 +28,14 @@ public class Banker {
         System.out.print("Amount: ");
         double amount = Double.parseDouble(scanner.nextLine());
 
-        boolean result = bankerService.withdraw(
+        String result = bankerService.withdrawWithResult(
                 actor[0],
                 customerId,
                 accountId,
                 amount
         );
 
-        if (result) {
-            System.out.println(Constants.WITHDRAW_SUCCESS);
-        } else {
-            System.out.println(Constants.GENERAL_ERROR);
-        }
+        System.out.println(result);
     }
 
     private void deposit(Scanner scanner, String[] actor) {
@@ -49,18 +45,14 @@ public class Banker {
         System.out.print("Amount: ");
         double amount = Double.parseDouble(scanner.nextLine());
 
-        boolean result = bankerService.deposit(
+        String result = bankerService.depositWithResult(
                 actor[0],
                 customerId,
                 accountId,
                 amount
         );
 
-        if (result) {
-            System.out.println(Constants.DEPOSIT_SUCCESS);
-        } else {
-            System.out.println(Constants.GENERAL_ERROR);
-        }
+        System.out.println(result);
     }
 
     private void transfer(Scanner scanner, String[] actor) {
